@@ -44,8 +44,8 @@ app.get("/path", (req, res, next) => {
   
 
 app.post("/scheduler",scheduler.create)
-app.get("/scheduler",scheduler.findAll)
-
+app.get("/scheduler/:userId",scheduler.findAll)
+app.post("/updateTracker",scheduler.updateTracker);
 app.use((req, res, next) => {
   return res.status(404).json({
     error: "Not Found",

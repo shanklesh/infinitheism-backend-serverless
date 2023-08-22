@@ -36,27 +36,19 @@ exports.create = (req, res) => {
 
     }
 
-    //Create scheduler tracker object
-
-    const  scheduler_tracker = {
-        user_id: data.userId,
-        scheduler_practice_status: data.schedulerTracker.practice
-    }
-  
     // Save Tutorial in the database
     Scheduler.create(scheduler)
       .then(response => {
-        scheduler_time['scheduler_id'] =  response.scheduler_id
-        SchedulerTime.create(scheduler_time).then(timeResponse => {
-            scheduler_tracker['scheduler_time_id'] = timeResponse.scheduler_time_id
-            SchedulerTracker.create(scheduler_tracker).then(trackerResponse => {
-                res.send(trackerResponse);
-            }) .catch(err => {
-            res.status(500).send({
-            message:
-            err.message || "Some error occurred while creating the Tutorial."
-          });
-      });
+        scheduler_time['scheduler_id'] =  response.scheduler_id;
+
+        for(let i=0; i< data.schedulerTime.length; i++) {
+             data.schedulerTime[i]['scheduler_id'] = response.scheduler_id;
+        }
+
+        SchedulerTime.bulkCreate(data.schedulerTime).then(timeResponse => {
+
+                res.status(201).send(timeResponse);
+        
             }
         ) .catch(err => {
             res.status(500).send({
@@ -75,31 +67,62 @@ exports.create = (req, res) => {
 
 // Retrieve all Tutorials from the database.
 exports.findAll = async (req, res) => {
-    // const scheduler_name = req.query.scheduler_name;
-    // var condition = scheduler_name ? { scheduler_name: { [Op.iLike]: `%${scheduler_name}%` } } : null;
-  
-    // Scheduler.findAll({ where: condition })
-    //   .then(data => {
-    //     res.send(data);
-    //   })
-    //   .catch(err => {
-    //     res.status(500).send({
-    //       message:
-    //         err.message || "Some error occurred while retrieving tutorials."
-    //     });
-    //   });
+    const { userId } = req.params;
     try{
-        const [results, metadata] = await db.sequelize.query("SELECT * FROM schedulers");
-        console.log(results)
-        res.send(result)
+       
+        const schedulerQuery = `select * from schedulers where user_id = '${userId}'`;
+        
+        const [schedulerResults, metadata] = await db.sequelize.query(schedulerQuery);
+
+        const schedulerTimeQuery = `select * from scheduler_times where user_id = '${userId}' AND scheduler_id =${schedulerResults[0].scheduler_id};`;
+
+        const [schedulerTimeResults, timeMetadata] = await db.sequelize.query(schedulerTimeQuery);
+
+        const response = {};
+              response['sceduler']= schedulerResults[0]
+              response['scedulerTime']= schedulerTimeResults;
+
+        res.send(response)
+
         // We didn't need to destructure the result here - the results were returned directly
     }catch(error){
         console.log(error)
+        res.status(500).send(error)
     }
   };
 // Find a single Tutorial with an id
-exports.findOne = (req, res) => {
+exports.updateTracker = (req, res) => {
+    const { body} = req;
+    const data = JSON.parse(body);
+    console.log(data)
+    // Validate request
+    if (!data.schedulerId && ! data.schedulerTimeId && !data.userId) {
+      res.status(400).send({
+        message: "Content can not be empty!"
+      });
+      return;
+    }
   
+
+    //Create scheduler tracker object
+
+    const  scheduler_tracker = {
+        user_id: data.userId,
+        status: data.status,
+        scheduler_time_id : data.schedulerTimeId
+    }
+  
+    // Save Tutorial in the database
+    SchedulerTracker.create(scheduler_tracker)
+      .then(response => {
+         res.status(201).send('tracker updated');
+      })
+      .catch(err => {
+        res.status(500).send({
+          message:
+            err.message || "Some error occurred while creating the Tutorial."
+        });
+      });
 };
 
 // Update a Tutorial by the id in the request

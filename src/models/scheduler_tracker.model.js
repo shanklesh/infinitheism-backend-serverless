@@ -4,14 +4,14 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.INTEGER, autoIncrement: true, primaryKey: true
       },
       scheduler_time_id: {
-        type: Sequelize.STRING,
+        type: Sequelize.INTEGER,
         allowNull: false
       },
       user_id: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      scheduler_practice_status: {
+      status: {
         type: Sequelize.BOOLEAN
       }
     });
