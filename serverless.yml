@@ -1,0 +1,14 @@
+service: serverless-infinitheism-backend
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+
+functions:
+  api:
+    handler: index.handler
+    events:
+      - httpApi: '*'
+plugins:
+  - serverless-offline
