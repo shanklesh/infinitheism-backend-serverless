@@ -1,4 +1,4 @@
-
+const scheduler_time = require('./scheduler_time.model');
 
 module.exports = (sequelize, Sequelize) => {
     const Scheduler = sequelize.define("scheduler", {
@@ -13,6 +13,5 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING
       }
     });
-     
     return Scheduler;
   };

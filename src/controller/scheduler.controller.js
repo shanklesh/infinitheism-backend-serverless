@@ -1,3 +1,5 @@
+const Sequelize = require("sequelize");
+
 const db = require("../models");
 const Scheduler = db.scheduler;
 const SchedulerTime = db.scheduler_time;
@@ -30,7 +32,7 @@ exports.create = (req, res) => {
     const scheduler_time = {
         user_id: data.userId,
         scheduler_time: data.schedulerTime.schedulerTime,
-        scheduler_day: data.schedularDay.schedularDay
+        scheduler_day: data.schedulerTime.schedulerDay
 
     }
 
@@ -43,9 +45,25 @@ exports.create = (req, res) => {
   
     // Save Tutorial in the database
     Scheduler.create(scheduler)
-      .then(data => {
-
-        res.send(data);
+      .then(response => {
+        scheduler_time['scheduler_id'] =  response.scheduler_id
+        SchedulerTime.create(scheduler_time).then(timeResponse => {
+            scheduler_tracker['scheduler_time_id'] = timeResponse.scheduler_time_id
+            SchedulerTracker.create(scheduler_tracker).then(trackerResponse => {
+                res.send(trackerResponse);
+            }) .catch(err => {
+            res.status(500).send({
+            message:
+            err.message || "Some error occurred while creating the Tutorial."
+          });
+      });
+            }
+        ) .catch(err => {
+            res.status(500).send({
+              message:
+                err.message || "Some error occurred while creating the Tutorial."
+            });
+          });
       })
       .catch(err => {
         res.status(500).send({
@@ -56,20 +74,28 @@ exports.create = (req, res) => {
   };
 
 // Retrieve all Tutorials from the database.
-exports.findAll = (req, res) => {
-    const scheduler_name = req.query.scheduler_name;
-    var condition = scheduler_name ? { scheduler_name: { [Op.iLike]: `%${scheduler_name}%` } } : null;
+exports.findAll = async (req, res) => {
+    // const scheduler_name = req.query.scheduler_name;
+    // var condition = scheduler_name ? { scheduler_name: { [Op.iLike]: `%${scheduler_name}%` } } : null;
   
-    Scheduler.findAll({ where: condition })
-      .then(data => {
-        res.send(data);
-      })
-      .catch(err => {
-        res.status(500).send({
-          message:
-            err.message || "Some error occurred while retrieving tutorials."
-        });
-      });
+    // Scheduler.findAll({ where: condition })
+    //   .then(data => {
+    //     res.send(data);
+    //   })
+    //   .catch(err => {
+    //     res.status(500).send({
+    //       message:
+    //         err.message || "Some error occurred while retrieving tutorials."
+    //     });
+    //   });
+    try{
+        const [results, metadata] = await db.sequelize.query("SELECT * FROM schedulers");
+        console.log(results)
+        res.send(result)
+        // We didn't need to destructure the result here - the results were returned directly
+    }catch(error){
+        console.log(error)
+    }
   };
 // Find a single Tutorial with an id
 exports.findOne = (req, res) => {

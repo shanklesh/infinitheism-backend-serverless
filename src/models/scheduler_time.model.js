@@ -7,7 +7,7 @@ module.exports = (sequelize, Sequelize) => {
       scheduler_id: {
         type: Sequelize.INTEGER
       },
-      schedular_time: {
+      scheduler_time: {
         type: Sequelize.STRING
       },
       scheduler_day: {
