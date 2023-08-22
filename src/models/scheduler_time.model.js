@@ -13,6 +13,10 @@ module.exports = (sequelize, Sequelize) => {
       scheduler_day: {
         type: Sequelize.STRING
       },
+      user_id: {
+        type: Sequelize.STRING,
+        allowNull: false
+      }
     });
     
     return SchedulerTime;
